@@ -24,7 +24,7 @@ class Gtrend(object):
                                    geo=kwargs.get('geo', '')
                                    )
         trend = self.pytrend.interest_over_time()
-        assert (trend.index==pd.DatetimeIndex(start=start_date,end=end_date,freq='w')).all(), 'Non-weekly trend freq'
+        assert (trend.index==pd.DatetimeIndex(start=start_date,end=end_date,freq='W')).all(), 'Non-weekly trend freq'
         return trend
 
     def get_daily_trend(self, key_word, start_date, end_date, **kwargs):
@@ -39,7 +39,7 @@ class Gtrend(object):
                                            geo=kwargs.get('geo', '')
                                            )
                 trend = self.pytrend.interest_over_time()
-                assert (trend.index==pd.DatetimeIndex(start=start,end=end,freq='d')).all(), 'Non-daily trend freq.'
+                assert (trend.index==pd.DatetimeIndex(start=start,end=end,freq='D')).all(), 'Non-daily trend freq.'
                 yield trend
 
         return pd.concat([t for t in _trend()])
@@ -48,9 +48,9 @@ class Gtrend(object):
 
         def _ktrend():
             for w in kw_lst:
-                if freq=='d':
+                if freq=='D':
                     yield self.get_daily_trend(w, start_date, end_date, **kwargs)
-                elif freq=='w':
+                elif freq=='W':
                     yield self.get_weekly_trend(w, start_date, end_date, **kwargs)
 
         trend = pd.concat([t for t in _ktrend()], axis=1)
@@ -60,6 +60,13 @@ class Gtrend(object):
 
     @staticmethod
     def date_range(start_date, end_date, gap='240 days'):
+        """
+
+        :param start_date:
+        :param end_date:
+        :param gap: 240 d is daily threshold, 5 y is weekly threshold
+        :return:
+        """
         start = pd.to_datetime(start_date)
         end = pd.to_datetime(end_date)
         dif = pd.Timedelta(gap)
@@ -73,7 +80,7 @@ class Gtrend(object):
                 yield (prev, now)
             prev = now
             if i > 0:
-                prev += pd.Timedelta('1 d')
+                prev += pd.Timedelta('1 D')
 
     @staticmethod
     def geohelper(return_type='dataframe'):
@@ -88,11 +95,15 @@ class Gtrend(object):
 
 
 gt = Gtrend()
-gt.initialize('','')
+gt.initialize(username='',password='')
 d_trend = gt.get_daily_trend('loreal', '2014-01-01', '2016-12-24')
-w_trend = gt.get_weekly_trend('loreal', '2014-01-01', '2016-12-24')
+w_trend = gt.get_weekly_trend('loreal', '2011-10-24', '2016-12-24')
 
-trend = gt.kwords_trend(['oreal','loreal','loreal paris'], '2014-01-01', '2016-12-24', 'w')
+trend = gt.kwords_trend(kw_lst=['oreal','loreal','loreal paris'],
+                        start_date='2014-01-01',
+                        end_date='2016-12-24',
+                        freq='W',
+                        geo='US')
 
 
 
