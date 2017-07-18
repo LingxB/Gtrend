@@ -1,6 +1,7 @@
 from pytrends.request import TrendReq
 import pandas as pd
 import numpy as np
+import warnings
 import time
 from datetime import datetime
 from random import randint
@@ -74,6 +75,17 @@ class Gtrend(object):
             if i > 0:
                 prev += pd.Timedelta('1 d')
 
+    @staticmethod
+    def geohelper(return_type='dataframe'):
+        geocodes = pd.read_csv('aux_data/ISO 3166-1-alpha-2.csv')
+        if return_type=='dataframe':
+            return geocodes.set_index('Name')
+        elif return_type=='dict':
+            return geocodes.set_index('Name')['Code'].to_dict()
+        else:
+            warnings.warn('Non valid return_type: %s'%return_type)
+
+
 
 gt = Gtrend()
 gt.initialize('','')
@@ -81,10 +93,6 @@ d_trend = gt.get_daily_trend('loreal', '2014-01-01', '2016-12-24')
 w_trend = gt.get_weekly_trend('loreal', '2014-01-01', '2016-12-24')
 
 trend = gt.kwords_trend(['oreal','loreal','loreal paris'], '2014-01-01', '2016-12-24', 'w')
-
-
-
-
 
 
 
